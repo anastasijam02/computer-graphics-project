@@ -3,7 +3,7 @@
     "models": {
       "boat": {
         "path": "boat/scene.gltf",
-        "flip_uvs": false
+        "flip_uvs": true
       }
     }
   },
