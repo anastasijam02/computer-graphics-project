@@ -14,6 +14,10 @@ namespace app {
 
         bool loop() override;
 
+        void update_camera();
+
+        void update() override;
+
         void begin_draw() override;
 
         void draw_boat();
