@@ -27,6 +27,11 @@ namespace app {
         auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
         platform->register_platform_event_observer(std::make_unique<MainPlatformEventObserver>());
         engine::graphics::OpenGL::enable_depth_testing();
+
+        auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
+        graphics->camera()->Position = glm::vec3(0.0f, 1.0f, 0.0f);
+
+        initialize_sea();
     }
 
     bool MainController::loop() {
@@ -91,7 +96,59 @@ namespace app {
         platform->swap_buffers();
     }
 
+    void MainController::initialize_sea() {
+        float sea_vertices[] = {
+            // position            // texture coordinates
+            -1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+            1.0f, 0.0f, -1.0f, 10.0f, 0.0f,
+            1.0f, 0.0f, 1.0f, 10.0f, 10.0f,
+            -1.0f, 0.0f, 1.0f, 0.0f, 10.0f
+        };
+
+        unsigned int sea_indices[] = {
+            0, 2, 1,
+            0, 3, 2
+        };
+
+        engine::graphics::OpenGL::initialize_sea(
+            sea_vao,
+            sea_vbo,
+            sea_ebo,
+            sea_vertices,
+            sizeof(sea_vertices),
+            sea_indices,
+            sizeof(sea_indices)
+        );
+    }
+
+    void MainController::draw_sea() {
+        auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
+        auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
+
+        engine::resources::Shader *shader = resources->shader("sea");
+        engine::resources::Texture *water_texture = resources->texture("dark_water");
+
+        shader->use();
+
+        shader->set_int("water_texture", 0);
+
+        shader->set_mat4("projection", graphics->projection_matrix());
+        shader->set_mat4("view", graphics->camera()->view_matrix());
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, -0.15f, -3.0f));
+        model = glm::scale(model, glm::vec3(100.0f, 1.0f, 100.0f));
+        shader->set_mat4("model", model);
+
+        water_texture->bind(engine::graphics::OpenGL::texture_unit(0));
+
+        shader->set_int("water_texture", 0);
+
+        engine::graphics::OpenGL::draw_indexed(sea_vao, 6);
+    }
+
     void MainController::draw() {
+        draw_sea();
         draw_boat();
     }
 } // app

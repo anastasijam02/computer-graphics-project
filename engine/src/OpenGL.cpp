@@ -205,5 +205,39 @@ int32_t stbi_number_of_channels_to_gl_format(int32_t number_of_channels) {
         default: RG_SHOULD_NOT_REACH_HERE("Unknown channels {}", number_of_channels);
     }
 }
+    void OpenGL::initialize_sea(
+        uint32_t &vao,
+        uint32_t &vbo,
+        uint32_t &ebo,
+        const float *vertices,
+        size_t vertices_size,
+        const uint32_t *indices,
+        size_t indices_size )
+    { CHECKED_GL_CALL(glGenVertexArrays, 1, &vao);
+      CHECKED_GL_CALL(glGenBuffers, 1, &vbo);
+      CHECKED_GL_CALL(glGenBuffers, 1, &ebo);
+      CHECKED_GL_CALL(glBindVertexArray, vao);
+      CHECKED_GL_CALL(glBindBuffer, GL_ARRAY_BUFFER, vbo);
+      CHECKED_GL_CALL(glBufferData, GL_ARRAY_BUFFER, vertices_size, vertices, GL_STATIC_DRAW);
+      CHECKED_GL_CALL(glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, ebo);
+      CHECKED_GL_CALL(glBufferData, GL_ELEMENT_ARRAY_BUFFER, indices_size, indices, GL_STATIC_DRAW);
+
+      // position
+      CHECKED_GL_CALL(glVertexAttribPointer, 0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) 0);
+      CHECKED_GL_CALL(glEnableVertexAttribArray, 0);
+
+      // texture coordinates
+      CHECKED_GL_CALL(glVertexAttribPointer, 1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) (3 * sizeof(float)));
+      CHECKED_GL_CALL(glEnableVertexAttribArray, 1); CHECKED_GL_CALL(glBindVertexArray, 0);
+    }
+
+    void OpenGL::draw_indexed(uint32_t vao, uint32_t index_count) {
+      CHECKED_GL_CALL(glBindVertexArray, vao);
+      CHECKED_GL_CALL(glDrawElements, GL_TRIANGLES, index_count, GL_UNSIGNED_INT, nullptr);
+      CHECKED_GL_CALL(glBindVertexArray, 0);
+    }
+    int32_t OpenGL::texture_unit(uint32_t unit) {
+      return GL_TEXTURE0 + static_cast<int32_t>(unit);
+    }
 
 };// namespace engine::graphics

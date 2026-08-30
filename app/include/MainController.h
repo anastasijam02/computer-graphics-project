@@ -10,6 +10,10 @@
 
 namespace app {
     class MainController : public engine::core::Controller {
+        unsigned int sea_vao;
+        unsigned int sea_vbo;
+        unsigned int sea_ebo;
+
         void initialize() override;
 
         bool loop() override;
@@ -23,6 +27,10 @@ namespace app {
         void draw_boat();
 
         void end_draw() override;
+
+        void initialize_sea();
+
+        void draw_sea();
 
         void draw() override;
 
