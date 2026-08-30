@@ -1,0 +1,11 @@
+Model Information:
+* title:	Dark Lighthouse
+* source:	https://sketchfab.com/3d-models/dark-lighthouse-6eb04469e0324ff1a8a1a179e294bc53
+* author:	Nicolas Gutierrez (https://sketchfab.com/NicolasGutierrez)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Dark Lighthouse" (https://sketchfab.com/3d-models/dark-lighthouse-6eb04469e0324ff1a8a1a179e294bc53) by Nicolas Gutierrez (https://sketchfab.com/NicolasGutierrez) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
