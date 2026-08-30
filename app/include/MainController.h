@@ -34,6 +34,8 @@ namespace app {
 
         void draw_lighthouse();
 
+        void draw_skybox();
+
         void draw() override;
 
     public:

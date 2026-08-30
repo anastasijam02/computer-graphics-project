@@ -168,9 +168,19 @@ namespace app {
         lighthouse->draw(shader);
     }
 
+    void MainController::draw_skybox() {
+        auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
+        auto skybox = resources->skybox("night_sky");
+        auto shader = resources->shader("skybox");
+        auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
+        graphics->draw_skybox(shader, skybox);
+
+    }
+
     void MainController::draw() {
         draw_sea();
         draw_boat();
         draw_lighthouse();
+        draw_skybox();
     }
 } // app
