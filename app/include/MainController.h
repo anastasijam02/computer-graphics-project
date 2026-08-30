@@ -32,6 +32,8 @@ namespace app {
 
         void draw_sea();
 
+        void draw_lighthouse();
+
         void draw() override;
 
     public:
