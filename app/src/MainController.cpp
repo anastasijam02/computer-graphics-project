@@ -73,11 +73,15 @@ namespace app {
         auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
         engine::resources::Model *boat = resources->model("boat");
 
-        engine::resources::Shader *shader = resources->shader("basic");
+        engine::resources::Shader *shader = resources->shader("lighting");
 
         auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
 
         shader->use();
+
+        set_directional_light(shader);
+        shader->set_vec3("view_position", graphics->camera()->Position);
+
         shader->set_mat4("projection", graphics->projection_matrix());
         shader->set_mat4("view", graphics->camera()->view_matrix());
         shader->set_mat4("model", glm::mat4(1.0f));
@@ -153,9 +157,12 @@ namespace app {
 
         engine::resources::Model *lighthouse = resources->model("lighthouse");
 
-        engine::resources::Shader *shader = resources->shader("basic");
+        engine::resources::Shader *shader = resources->shader("lighting");
 
         shader->use();
+
+        set_directional_light(shader);
+        shader->set_vec3("view_position", graphics->camera()->Position);
 
         shader->set_mat4("projection",graphics->projection_matrix());
         shader->set_mat4("view",graphics->camera()->view_matrix());
@@ -182,5 +189,12 @@ namespace app {
         draw_boat();
         draw_lighthouse();
         draw_skybox();
+    }
+
+    void MainController::set_directional_light(engine::resources::Shader *shader) {
+        shader->set_vec3("directional_light.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+        shader->set_vec3("directional_light.ambient", glm::vec3(0.05f, 0.05f, 0.08f));
+        shader->set_vec3("directional_light.diffuse", glm::vec3(0.20f, 0.25f, 0.35f));
+        shader->set_vec3("directional_light.specular", glm::vec3(0.4f, 0.4f, 0.5f));
     }
 } // app

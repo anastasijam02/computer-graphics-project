@@ -7,6 +7,7 @@
 #include "engine/core/Controller.hpp"
 
 #include <engine/core/Controller.hpp>
+#include <engine/resources/Shader.hpp>
 
 namespace app {
     class MainController : public engine::core::Controller {
@@ -37,6 +38,8 @@ namespace app {
         void draw_skybox();
 
         void draw() override;
+
+        void set_directional_light(engine::resources::Shader *shader);
 
     public:
         std::string_view name() const override {
