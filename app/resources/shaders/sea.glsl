@@ -26,5 +26,8 @@ uniform sampler2D water_texture;
 
 void main()
 {
-    FragColor = texture(water_texture, TexCoords);
+    vec3 water_color = texture(water_texture, TexCoords).rgb;
+    water_color *= 0.35;
+
+    FragColor = vec4(water_color, 1.0);
 }
