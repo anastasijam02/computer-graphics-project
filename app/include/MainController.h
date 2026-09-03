@@ -8,9 +8,16 @@
 
 #include <engine/core/Controller.hpp>
 #include <engine/resources/Shader.hpp>
-
+#include <glm/glm.hpp>
 namespace app {
     class MainController : public engine::core::Controller {
+        unsigned int lamp_vao = 0;
+        unsigned int lamp_vbo = 0;
+
+        void initialize_lamp();
+        void draw_lamp();
+        glm::vec3 boat_front_lamp_position = glm::vec3(1.1393508f, 0.33798105f, -3.0f);
+        
         unsigned int sea_vao;
         unsigned int sea_vbo;
         unsigned int sea_ebo;
@@ -40,6 +47,8 @@ namespace app {
         void draw() override;
 
         void set_directional_light(engine::resources::Shader *shader);
+
+        void set_point_light(engine::resources::Shader *shader);
 
     public:
         std::string_view name() const override {

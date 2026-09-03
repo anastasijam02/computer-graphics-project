@@ -236,6 +236,29 @@ int32_t stbi_number_of_channels_to_gl_format(int32_t number_of_channels) {
       CHECKED_GL_CALL(glDrawElements, GL_TRIANGLES, index_count, GL_UNSIGNED_INT, nullptr);
       CHECKED_GL_CALL(glBindVertexArray, 0);
     }
+
+    void OpenGL::initialize_lamp(uint32_t &vao, uint32_t &vbo, const float *vertices, size_t vertices_size) {
+        CHECKED_GL_CALL(glGenVertexArrays, 1, &vao);
+        CHECKED_GL_CALL(glGenBuffers, 1, &vbo);
+
+        CHECKED_GL_CALL(glBindVertexArray, vao);
+        CHECKED_GL_CALL(glBindBuffer, GL_ARRAY_BUFFER, vbo);
+
+        CHECKED_GL_CALL(glBufferData, GL_ARRAY_BUFFER, vertices_size, vertices, GL_STATIC_DRAW);
+
+        CHECKED_GL_CALL(glVertexAttribPointer, 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *) 0);
+
+        CHECKED_GL_CALL(glEnableVertexAttribArray, 0);
+
+        CHECKED_GL_CALL(glBindVertexArray, 0);
+    }
+
+    void OpenGL::draw_lamp(uint32_t vao, uint32_t vertex_count) {
+        CHECKED_GL_CALL(glBindVertexArray, vao);
+        CHECKED_GL_CALL(glDrawArrays, GL_TRIANGLES, 0, vertex_count);
+        CHECKED_GL_CALL(glBindVertexArray, 0);
+    }
+
     int32_t OpenGL::texture_unit(uint32_t unit) {
       return GL_TEXTURE0 + static_cast<int32_t>(unit);
     }

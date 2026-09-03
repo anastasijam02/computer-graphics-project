@@ -22,6 +22,70 @@ namespace app {
     }
 
 
+    void MainController::initialize_lamp(){
+        float lamp_vertices[] = {
+            -0.5f, -0.5f, -0.5f,
+             0.5f, -0.5f, -0.5f,
+             0.5f,  0.5f, -0.5f,
+
+             0.5f,  0.5f, -0.5f,
+            -0.5f,  0.5f, -0.5f,
+            -0.5f, -0.5f, -0.5f,
+
+
+            -0.5f, -0.5f,  0.5f,
+             0.5f, -0.5f,  0.5f,
+             0.5f,  0.5f,  0.5f,
+
+             0.5f,  0.5f,  0.5f,
+            -0.5f,  0.5f,  0.5f,
+            -0.5f, -0.5f,  0.5f,
+
+
+            -0.5f,  0.5f,  0.5f,
+            -0.5f,  0.5f, -0.5f,
+            -0.5f, -0.5f, -0.5f,
+
+            -0.5f, -0.5f, -0.5f,
+            -0.5f, -0.5f,  0.5f,
+            -0.5f,  0.5f,  0.5f,
+
+
+             0.5f,  0.5f,  0.5f,
+             0.5f,  0.5f, -0.5f,
+             0.5f, -0.5f, -0.5f,
+
+             0.5f, -0.5f, -0.5f,
+             0.5f, -0.5f,  0.5f,
+             0.5f,  0.5f,  0.5f,
+
+
+            -0.5f, -0.5f, -0.5f,
+             0.5f, -0.5f, -0.5f,
+             0.5f, -0.5f,  0.5f,
+
+             0.5f, -0.5f,  0.5f,
+            -0.5f, -0.5f,  0.5f,
+            -0.5f, -0.5f, -0.5f,
+
+
+            -0.5f,  0.5f, -0.5f,
+             0.5f,  0.5f, -0.5f,
+             0.5f,  0.5f,  0.5f,
+
+             0.5f,  0.5f,  0.5f,
+            -0.5f,  0.5f,  0.5f,
+            -0.5f,  0.5f, -0.5f
+        };
+
+        engine::graphics::OpenGL::initialize_lamp(
+            lamp_vao,
+            lamp_vbo,
+            lamp_vertices,
+            sizeof(lamp_vertices)
+        );
+    }
+
     void MainController::initialize() {
         spdlog::info("MainController initialized!!!");
         auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
@@ -32,6 +96,7 @@ namespace app {
         graphics->camera()->Position = glm::vec3(0.0f, 1.0f, 0.0f);
 
         initialize_sea();
+        initialize_lamp();
     }
 
     bool MainController::loop() {
@@ -80,6 +145,8 @@ namespace app {
         shader->use();
 
         set_directional_light(shader);
+        set_point_light(shader);
+
         shader->set_vec3("view_position", graphics->camera()->Position);
 
         shader->set_mat4("projection", graphics->projection_matrix());
@@ -134,6 +201,13 @@ namespace app {
 
         shader->use();
 
+        //point light sa broda
+        shader->set_vec3("point_light.position", boat_front_lamp_position);
+        shader->set_vec3("point_light.diffuse", glm::vec3(3.0f, 1.4f, 0.3f));
+        shader->set_float("point_light.constant", 1.0f);
+        shader->set_float("point_light.linear",0.7f);
+        shader->set_float("point_light.quadratic", 1.2f);
+
         shader->set_int("water_texture", 0);
 
         shader->set_mat4("projection", graphics->projection_matrix());
@@ -184,11 +258,33 @@ namespace app {
 
     }
 
+    void MainController::draw_lamp(){
+        auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
+
+        auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
+
+        auto shader = resources->shader("lamp");
+
+        shader->use();
+
+        shader->set_mat4("projection", graphics->projection_matrix());
+        shader->set_mat4("view", graphics->camera()->view_matrix());
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, boat_front_lamp_position);
+        model = glm::scale(model, glm::vec3(0.04f));
+        shader->set_mat4("model", model);
+
+        engine::graphics::OpenGL::draw_lamp(lamp_vao,36);
+
+    }
+
     void MainController::draw() {
         draw_sea();
         draw_boat();
         draw_lighthouse();
         draw_skybox();
+        draw_lamp();
     }
 
     void MainController::set_directional_light(engine::resources::Shader *shader) {
@@ -196,5 +292,16 @@ namespace app {
         shader->set_vec3("directional_light.ambient", glm::vec3(0.05f, 0.05f, 0.08f));
         shader->set_vec3("directional_light.diffuse", glm::vec3(0.20f, 0.25f, 0.35f));
         shader->set_vec3("directional_light.specular", glm::vec3(0.4f, 0.4f, 0.5f));
+    }
+
+    void MainController::set_point_light(engine::resources::Shader *shader) {
+        shader->set_vec3("point_light.position", boat_front_lamp_position);
+        shader->set_vec3("point_light.ambient", glm::vec3(0.01f, 0.005f, 0.001f));
+        shader->set_vec3("point_light.diffuse", glm::vec3(1.5f, 0.7f, 0.15f));
+        shader->set_vec3("point_light.specular", glm::vec3(0.8f, 0.35f, 0.08f));
+
+        shader->set_float("point_light.constant", 1.0f);
+        shader->set_float("point_light.linear", 2.0f);
+        shader->set_float("point_light.quadratic", 4.0f);
     }
 } // app

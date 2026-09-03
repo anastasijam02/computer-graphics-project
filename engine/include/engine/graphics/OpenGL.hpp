@@ -152,6 +152,10 @@ public:
 
     static void draw_indexed(uint32_t vao, uint32_t index_count);
 
+    static void initialize_lamp(uint32_t &vao, uint32_t &vbo, const float *vertices, size_t vertices_size);
+
+    static void draw_lamp(uint32_t vao, uint32_t vertex_count);
+
     static int32_t texture_unit(uint32_t unit);
 
 private:
