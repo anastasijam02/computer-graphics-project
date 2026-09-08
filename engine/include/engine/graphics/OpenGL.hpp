@@ -158,6 +158,10 @@ public:
 
     static int32_t texture_unit(uint32_t unit);
 
+    static void enable_blending();
+
+    static void disable_blending();
+
 private:
     /**
     * @brief Throws an engine::util::EngineError of type @ref engine::util::EngineError::Type::OpenGLError if an OpenGL error occurred. Used internally.

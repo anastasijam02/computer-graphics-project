@@ -9,6 +9,9 @@
 #include "engine/platform/PlatformController.hpp"
 #include "engine/resources/ResourcesController.hpp"
 #include "spdlog/spdlog.h"
+#include <glm/gtc/matrix_transform.hpp>
+#include <vector>
+#include <cmath>
 
 namespace app {
     class MainPlatformEventObserver : public engine::platform::PlatformEventObserver {
@@ -21,6 +24,75 @@ namespace app {
         camera->rotate_camera(position.dx * 0.1f, position.dy * 0.1f);
     }
 
+
+    void MainController::initialize_lighthouse_beam(){
+        const float length = 15.0f;
+        const float half_width = 1.3f;
+
+        float vertices[] = {
+            // vrh kod lampe
+            0.0f,  0.0f, 0.0f,
+
+           // kraj snopa
+           -half_width, 0.0f, length,
+
+            half_width, 0.0f, length
+       };
+
+        beam_vertex_count = 3;
+
+        engine::graphics::OpenGL::initialize_lamp(
+            beam_vao,
+            beam_vbo,
+            vertices,
+            sizeof(vertices)
+        );
+    }
+
+    void MainController::draw_lighthouse_beam() {
+        auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
+        auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
+
+        auto shader = resources->shader("beam");
+
+        shader->use();
+
+        shader->set_mat4("projection", graphics->projection_matrix());
+        shader->set_mat4("view", graphics->camera()->view_matrix());
+
+        glm::vec3 spot_direction = get_lighthouse_spot_direction();
+
+        //lokalni koord.sistem za beam
+        //lokalna z osa pokazuje u smeru svetlosti
+        glm::vec3 initial_up = glm::vec3(0.0f, 1.0f, 0.0f);
+        glm::vec3 right = glm::normalize(glm::cross(initial_up, spot_direction));
+        glm::vec3 up = glm::normalize(glm::cross(spot_direction, right));
+
+
+        // matrica rotacije
+        glm::mat4 rotation = glm::mat4(1.0f);
+        rotation[0] = glm::vec4(right, 0.0f);
+        rotation[1] = glm::vec4(up, 0.0f);
+        rotation[2] = glm::vec4(spot_direction, 0.0f);
+
+        glm::mat4 base_model = glm::mat4(1.0f);
+
+        base_model = glm::translate(base_model, lighthouse_light_position);
+        base_model = base_model * rotation;
+
+
+        int beam_planes = 4;
+        for (int i = 0; i < beam_planes; i++){
+            float angle = glm::radians(45.0f * i);
+            glm::mat4 model = base_model;
+            model = glm::rotate(model, angle, glm::vec3(0.0f, 0.0f, 1.0f));
+
+            shader->set_mat4("model", model);
+
+            engine::graphics::OpenGL::draw_lamp(beam_vao, beam_vertex_count);
+        }
+
+    }
 
     void MainController::initialize_lamp(){
         float lamp_vertices[] = {
@@ -97,6 +169,7 @@ namespace app {
 
         initialize_sea();
         initialize_lamp();
+        initialize_lighthouse_beam();
     }
 
     bool MainController::loop() {
@@ -152,7 +225,7 @@ namespace app {
 
         shader->set_mat4("projection", graphics->projection_matrix());
         shader->set_mat4("view", graphics->camera()->view_matrix());
-        shader->set_mat4("model", glm::mat4(1.0f));
+
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, -3.0f));
         model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -282,6 +355,15 @@ namespace app {
 
         engine::graphics::OpenGL::draw_lamp(lamp_vao,36);
 
+        glm::mat4 lighthouse_lamp_model = glm::mat4(1.0f);
+        lighthouse_lamp_model = glm::translate(lighthouse_lamp_model, lighthouse_light_position);
+        lighthouse_lamp_model = glm::scale(lighthouse_lamp_model, glm::vec3(0.08f));
+        shader->set_mat4("model", lighthouse_lamp_model);
+
+        engine::graphics::OpenGL::disable_depth_testing();
+        engine::graphics::OpenGL::draw_lamp(lamp_vao, 36);
+        engine::graphics::OpenGL::enable_depth_testing();
+
     }
 
     glm::vec3 MainController::get_lighthouse_spot_direction() {
@@ -294,6 +376,10 @@ namespace app {
         draw_boat();
         draw_lighthouse();
         draw_skybox();
+
+        engine::graphics::OpenGL::enable_blending();
+        draw_lighthouse_beam();
+        engine::graphics::OpenGL::disable_blending();
         draw_lamp();
     }
 

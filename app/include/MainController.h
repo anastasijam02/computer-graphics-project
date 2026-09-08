@@ -11,6 +11,13 @@
 #include <glm/glm.hpp>
 namespace app {
     class MainController : public engine::core::Controller {
+        unsigned int beam_vao = 0;
+        unsigned int beam_vbo = 0;
+        unsigned int beam_vertex_count = 0;
+
+        void initialize_lighthouse_beam();
+        void draw_lighthouse_beam();
+
         unsigned int lamp_vao = 0;
         unsigned int lamp_vbo = 0;
 

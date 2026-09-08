@@ -263,4 +263,14 @@ int32_t stbi_number_of_channels_to_gl_format(int32_t number_of_channels) {
       return GL_TEXTURE0 + static_cast<int32_t>(unit);
     }
 
+    void OpenGL::enable_blending() {
+        CHECKED_GL_CALL(glEnable, GL_BLEND);
+
+        CHECKED_GL_CALL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
+
+    void OpenGL::disable_blending() {
+        CHECKED_GL_CALL(glDisable, GL_BLEND);
+    }
+
 };// namespace engine::graphics
