@@ -146,6 +146,7 @@ namespace app {
 
         set_directional_light(shader);
         set_point_light(shader);
+        set_spot_light(shader);
 
         shader->set_vec3("view_position", graphics->camera()->Position);
 
@@ -208,6 +209,8 @@ namespace app {
         shader->set_float("point_light.linear",0.7f);
         shader->set_float("point_light.quadratic", 1.2f);
 
+        set_spot_light(shader);
+
         shader->set_int("water_texture", 0);
 
         shader->set_mat4("projection", graphics->projection_matrix());
@@ -219,8 +222,6 @@ namespace app {
         shader->set_mat4("model", model);
 
         water_texture->bind(engine::graphics::OpenGL::texture_unit(0));
-
-        shader->set_int("water_texture", 0);
 
         engine::graphics::OpenGL::draw_indexed(sea_vao, 6);
     }
@@ -236,6 +237,10 @@ namespace app {
         shader->use();
 
         set_directional_light(shader);
+        shader->set_vec3("directional_light.ambient", glm::vec3(0.20f, 0.20f, 0.30f));
+
+        set_spot_light(shader);
+
         shader->set_vec3("view_position", graphics->camera()->Position);
 
         shader->set_mat4("projection",graphics->projection_matrix());
@@ -279,6 +284,11 @@ namespace app {
 
     }
 
+    glm::vec3 MainController::get_lighthouse_spot_direction() {
+        return glm::normalize(lighthouse_spot_target - lighthouse_light_position);
+    }
+
+
     void MainController::draw() {
         draw_sea();
         draw_boat();
@@ -303,5 +313,23 @@ namespace app {
         shader->set_float("point_light.constant", 1.0f);
         shader->set_float("point_light.linear", 2.0f);
         shader->set_float("point_light.quadratic", 4.0f);
+    }
+
+    void MainController::set_spot_light(engine::resources::Shader *shader) {
+        shader->set_vec3("spot_light.position", lighthouse_light_position);
+
+        glm::vec3 spot_direction = get_lighthouse_spot_direction();
+        shader->set_vec3("spot_light.direction", spot_direction);
+
+        shader->set_float("spot_light.cutOff", glm::cos(glm::radians(4.0f)));
+        shader->set_float("spot_light.outerCutOff", glm::cos(glm::radians(7.0f)));
+
+        shader->set_vec3("spot_light.ambient", glm::vec3(0.0f));
+        shader->set_vec3("spot_light.diffuse",glm::vec3(4.0f, 3.0f, 1.2f));
+        shader->set_vec3("spot_light.specular", glm::vec3(1.5f, 1.4f, 1.0f));
+
+        shader->set_float("spot_light.constant", 1.0f);
+        shader->set_float("spot_light.linear", 0.045f);
+        shader->set_float("spot_light.quadratic", 0.0075f);
     }
 } // app

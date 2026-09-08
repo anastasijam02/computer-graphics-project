@@ -29,8 +29,7 @@ in vec3 FragPos;
 
 uniform sampler2D water_texture;
 
-
-struct PointLight {
+struct PointLight{
     vec3 position;
 
     vec3 ambient;
@@ -45,29 +44,116 @@ struct PointLight {
 uniform PointLight point_light;
 
 
+struct SpotLight{
+    vec3 position;
+    vec3 direction;
+
+    float cutOff;
+    float outerCutOff;
+
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+
+    float constant;
+    float linear;
+    float quadratic;
+};
+
+uniform SpotLight spot_light;
+
+vec3 calculate_point_light(
+    PointLight light,
+    vec3 normal,
+    vec3 frag_position,
+    vec3 water_color
+)
+{
+    vec3 light_direction = normalize(light.position - frag_position);
+
+    float diff = max(dot(normal, light_direction), 0.0);
+    vec3 diffuse = light.diffuse * diff * water_color;
+
+    float distance = length(light.position - frag_position);
+
+    float attenuation =
+        1.0 /
+        (
+            light.constant +
+            light.linear * distance +
+            light.quadratic *
+            distance *
+            distance
+        );
+
+    diffuse *= attenuation;
+
+    return diffuse;
+}
+
+
+vec3 calculate_spot_light(
+    SpotLight light,
+    vec3 normal,
+    vec3 frag_position,
+    vec3 water_color
+)
+{
+    vec3 light_direction = normalize(light.position - frag_position);
+
+    float theta = dot(light_direction, normalize(-light.direction));
+
+    float epsilon = light.cutOff - light.outerCutOff;
+
+    float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
+
+    float diff = max(dot(normal, light_direction), 0.0);
+    vec3 diffuse = light.diffuse * diff * water_color;
+
+    float distance = length(light.position - frag_position);
+
+    float attenuation =
+        1.0 /
+        (
+            light.constant +
+            light.linear * distance +
+            light.quadratic *
+            distance *
+            distance
+        );
+
+
+    diffuse *= attenuation * intensity;
+
+    return diffuse;
+}
+
+
 void main(){
     vec3 water_color = texture(water_texture, TexCoords).rgb;
 
     vec3 normal = vec3(0.0, 1.0, 0.0);
 
-    vec3 light_direction = normalize(point_light.position - FragPos);
 
-    float diff = max(dot(normal, light_direction), 0.0);
-    vec3 diffuse = point_light.diffuse * diff * water_color;
-
-    float distance = length(point_light.position - FragPos);
-
-    float attenuation =
-        1.0 /
-        (
-            point_light.constant +
-            point_light.linear * distance +
-            point_light.quadratic * distance * distance
+    vec3 point_result =
+        calculate_point_light(
+            point_light,
+            normal,
+            FragPos,
+            water_color
         );
 
-    diffuse *= attenuation;
 
-    vec3 result = water_color + diffuse;
+    vec3 spot_result =
+        calculate_spot_light(
+            spot_light,
+            normal,
+            FragPos,
+            water_color
+        );
+
+
+    vec3 result = water_color + point_result + spot_result;
 
     FragColor = vec4(result, 1.0);
 
