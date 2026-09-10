@@ -7,9 +7,33 @@
 #include "engine/core/Controller.hpp"
 
 #include <engine/core/Controller.hpp>
-
+#include <engine/resources/Shader.hpp>
+#include <glm/glm.hpp>
 namespace app {
     class MainController : public engine::core::Controller {
+        float lighthouse_angle = 0.0f;
+        float lighthouse_rotation_speed = 20.0f;
+
+        unsigned int beam_vao = 0;
+        unsigned int beam_vbo = 0;
+        unsigned int beam_vertex_count = 0;
+
+        void initialize_lighthouse_beam();
+        void draw_lighthouse_beam();
+
+        unsigned int lamp_vao = 0;
+        unsigned int lamp_vbo = 0;
+
+        void initialize_lamp();
+        void draw_lamp();
+        glm::vec3 boat_front_lamp_position = glm::vec3(1.1393508f, 0.33798105f, -3.0f);
+
+
+        glm::vec3 lighthouse_light_position = glm::vec3(7.9073563f, 6.8495054f, -14.7876625f);
+        glm::vec3 lighthouse_spot_target = glm::vec3(0.0f, 0.0f, -3.0f);
+
+        glm::vec3 get_lighthouse_spot_direction();
+
         unsigned int sea_vao;
         unsigned int sea_vbo;
         unsigned int sea_ebo;
@@ -37,6 +61,12 @@ namespace app {
         void draw_skybox();
 
         void draw() override;
+
+        void set_directional_light(engine::resources::Shader *shader);
+
+        void set_point_light(engine::resources::Shader *shader);
+
+        void set_spot_light(engine::resources::Shader *shader);
 
     public:
         std::string_view name() const override {
