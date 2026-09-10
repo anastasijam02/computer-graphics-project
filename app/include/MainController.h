@@ -11,6 +11,9 @@
 #include <glm/glm.hpp>
 namespace app {
     class MainController : public engine::core::Controller {
+        float lighthouse_angle = 0.0f;
+        float lighthouse_rotation_speed = 20.0f;
+
         unsigned int beam_vao = 0;
         unsigned int beam_vbo = 0;
         unsigned int beam_vertex_count = 0;

@@ -201,6 +201,16 @@ namespace app {
 
     void MainController::update() {
         update_camera();
+
+        auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
+
+        float dt = platform->dt();
+
+        lighthouse_angle += lighthouse_rotation_speed * dt;
+
+        if (lighthouse_angle >= 360.0f) {
+            lighthouse_angle -= 360.0f;
+        }
     }
 
     void MainController::begin_draw() {
@@ -367,7 +377,12 @@ namespace app {
     }
 
     glm::vec3 MainController::get_lighthouse_spot_direction() {
-        return glm::normalize(lighthouse_spot_target - lighthouse_light_position);
+        //return glm::normalize(lighthouse_spot_target - lighthouse_light_position);
+        float angle = glm::radians(lighthouse_angle);
+
+        glm::vec3 direction(glm::cos(angle),-0.5f, glm::sin(angle));
+
+        return glm::normalize(direction);
     }
 
 
