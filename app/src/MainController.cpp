@@ -218,6 +218,16 @@ namespace app {
         }
         p_was_down = p_down;
 
+        bool b_down = platform->key(engine::platform::KeyId::KEY_B).is_down();
+        if(b_down && !b_was_down){
+            boat_moving = !boat_moving;
+        }
+        b_was_down = b_down;
+
+        if(boat_moving){
+            boat_offset += boat_speed * dt;
+        }
+
     }
 
     void MainController::begin_draw() {
@@ -244,7 +254,7 @@ namespace app {
         shader->set_mat4("view", graphics->camera()->view_matrix());
 
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, -3.0f));
+        model = glm::translate(model, glm::vec3(boat_offset, 0.0f, -3.0f));
         model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(0.1f));
@@ -293,7 +303,9 @@ namespace app {
         shader->use();
 
         //point light sa broda
-        shader->set_vec3("point_light.position", boat_front_lamp_position);
+        glm::vec3 current_lamp_position = boat_front_lamp_position + glm::vec3(boat_offset, 0.0f, 0.0f);
+        shader->set_vec3("point_light.position", current_lamp_position);
+
         if(point_light_enabled) {
             shader->set_vec3("point_light.diffuse", glm::vec3(3.0f, 1.4f, 0.3f));
         } else {
@@ -371,7 +383,8 @@ namespace app {
 
         if(point_light_enabled) {
             glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, boat_front_lamp_position);
+            glm::vec3 current_lamp_position = boat_front_lamp_position + glm::vec3(boat_offset, 0.0f, 0.0f);
+            model = glm::translate(model, current_lamp_position);
             model = glm::scale(model, glm::vec3(0.04f));
             shader->set_mat4("model", model);
 
@@ -419,7 +432,8 @@ namespace app {
     }
 
     void MainController::set_point_light(engine::resources::Shader *shader) {
-        shader->set_vec3("point_light.position", boat_front_lamp_position);
+        glm::vec3 current_lamp_position = boat_front_lamp_position + glm::vec3(boat_offset, 0.0f, 0.0f);
+        shader->set_vec3("point_light.position", current_lamp_position);
 
         if(point_light_enabled) {
             shader->set_vec3("point_light.ambient", glm::vec3(0.01f, 0.005f, 0.001f));
