@@ -99,11 +99,6 @@ vec3 calculate_spot_light(
     vec3 water_color
 )
 {
-    vec3 water_color = texture(water_texture, TexCoords).rgb;
-    water_color *= 0.35;
-
-    FragColor = vec4(water_color, 1.0);
-
     vec3 light_direction = normalize(light.position - frag_position);
 
     float theta = dot(light_direction, normalize(-light.direction));
@@ -136,6 +131,7 @@ vec3 calculate_spot_light(
 
 void main(){
     vec3 water_color = texture(water_texture, TexCoords).rgb;
+    water_color *= 0.35;
 
     vec3 normal = vec3(0.0, 1.0, 0.0);
 
