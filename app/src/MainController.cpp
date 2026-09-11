@@ -211,6 +211,13 @@ namespace app {
         if (lighthouse_angle >= 360.0f) {
             lighthouse_angle -= 360.0f;
         }
+
+        bool p_down = platform->key(engine::platform::KeyId::KEY_P).is_down();
+        if (p_down && !p_was_down) { //P je sada pritisnut a u prethodnom frejmu nije
+            point_light_enabled = !point_light_enabled;
+        }
+        p_was_down = p_down;
+
     }
 
     void MainController::begin_draw() {
@@ -287,7 +294,11 @@ namespace app {
 
         //point light sa broda
         shader->set_vec3("point_light.position", boat_front_lamp_position);
-        shader->set_vec3("point_light.diffuse", glm::vec3(3.0f, 1.4f, 0.3f));
+        if(point_light_enabled) {
+            shader->set_vec3("point_light.diffuse", glm::vec3(3.0f, 1.4f, 0.3f));
+        } else {
+            shader->set_vec3("point_light.diffuse", glm::vec3(0.0f));
+        }
         shader->set_float("point_light.constant", 1.0f);
         shader->set_float("point_light.linear",0.7f);
         shader->set_float("point_light.quadratic", 1.2f);
@@ -358,12 +369,14 @@ namespace app {
         shader->set_mat4("projection", graphics->projection_matrix());
         shader->set_mat4("view", graphics->camera()->view_matrix());
 
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, boat_front_lamp_position);
-        model = glm::scale(model, glm::vec3(0.04f));
-        shader->set_mat4("model", model);
+        if(point_light_enabled) {
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, boat_front_lamp_position);
+            model = glm::scale(model, glm::vec3(0.04f));
+            shader->set_mat4("model", model);
 
-        engine::graphics::OpenGL::draw_lamp(lamp_vao,36);
+            engine::graphics::OpenGL::draw_lamp(lamp_vao,36);
+        }
 
         glm::mat4 lighthouse_lamp_model = glm::mat4(1.0f);
         lighthouse_lamp_model = glm::translate(lighthouse_lamp_model, lighthouse_light_position);
@@ -407,9 +420,17 @@ namespace app {
 
     void MainController::set_point_light(engine::resources::Shader *shader) {
         shader->set_vec3("point_light.position", boat_front_lamp_position);
-        shader->set_vec3("point_light.ambient", glm::vec3(0.01f, 0.005f, 0.001f));
-        shader->set_vec3("point_light.diffuse", glm::vec3(1.5f, 0.7f, 0.15f));
-        shader->set_vec3("point_light.specular", glm::vec3(0.8f, 0.35f, 0.08f));
+
+        if(point_light_enabled) {
+            shader->set_vec3("point_light.ambient", glm::vec3(0.01f, 0.005f, 0.001f));
+            shader->set_vec3("point_light.diffuse", glm::vec3(1.5f, 0.7f, 0.15f));
+            shader->set_vec3("point_light.specular", glm::vec3(0.8f, 0.35f, 0.08f));
+        } else {
+            shader->set_vec3("point_light.ambient", glm::vec3(0.0f));
+            shader->set_vec3("point_light.diffuse", glm::vec3(0.0f));
+            shader->set_vec3("point_light.specular", glm::vec3(0.0f));
+        }
+
 
         shader->set_float("point_light.constant", 1.0f);
         shader->set_float("point_light.linear", 2.0f);

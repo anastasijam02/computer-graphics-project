@@ -28,6 +28,8 @@ namespace app {
         void draw_lamp();
         glm::vec3 boat_front_lamp_position = glm::vec3(1.1393508f, 0.33798105f, -3.0f);
 
+        bool point_light_enabled = true;
+        bool p_was_down = false;
 
         glm::vec3 lighthouse_light_position = glm::vec3(7.9073563f, 6.8495054f, -14.7876625f);
         glm::vec3 lighthouse_spot_target = glm::vec3(0.0f, 0.0f, -3.0f);
