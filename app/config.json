@@ -1,11 +1,19 @@
 {
   "resources": {
     "models": {
+      "boat": {
+        "path": "boat/scene.gltf",
+        "flip_uvs": true
+      },
+      "lighthouse": {
+        "path": "lighthouse/scene.gltf",
+        "flip_uvs": true
+      }
     }
   },
   "window": {
-    "height": 600,
-    "title": "Hello, window!",
-    "width": 800
+    "height": 1200,
+    "title": "Lighthouse scene",
+    "width": 1600
   }
 }

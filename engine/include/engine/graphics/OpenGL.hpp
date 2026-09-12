@@ -141,6 +141,27 @@ public:
     */
     static std::string get_compilation_error_message(uint32_t shader_id);
 
+    static void initialize_sea(
+        uint32_t &VAO,
+        uint32_t &VBO,
+        uint32_t &EBO,
+        const float *vertices,
+        size_t vertices_size,
+        const uint32_t *indices,
+        size_t indices_size );
+
+    static void draw_indexed(uint32_t vao, uint32_t index_count);
+
+    static void initialize_lamp(uint32_t &vao, uint32_t &vbo, const float *vertices, size_t vertices_size);
+
+    static void draw_lamp(uint32_t vao, uint32_t vertex_count);
+
+    static int32_t texture_unit(uint32_t unit);
+
+    static void enable_blending();
+
+    static void disable_blending();
+
 private:
     /**
     * @brief Throws an engine::util::EngineError of type @ref engine::util::EngineError::Type::OpenGLError if an OpenGL error occurred. Used internally.
