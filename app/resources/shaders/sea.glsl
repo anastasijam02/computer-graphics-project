@@ -29,6 +29,8 @@ in vec3 FragPos;
 
 uniform sampler2D water_texture;
 
+uniform bool directional_light_dimmed;
+
 struct PointLight{
     vec3 position;
 
@@ -131,7 +133,10 @@ vec3 calculate_spot_light(
 
 void main(){
     vec3 water_color = texture(water_texture, TexCoords).rgb;
-    water_color *= 0.35;
+    if(directional_light_dimmed)
+        water_color *= 0.22;
+    else
+        water_color *= 0.35;
 
     vec3 normal = vec3(0.0, 1.0, 0.0);
 

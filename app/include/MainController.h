@@ -34,16 +34,24 @@ namespace app {
         bool boat_moving = false;
         bool b_was_down = false;
         float boat_offset = 0.0f;
-        float boat_speed = 0.5f;
+        float boat_speed = 0.2f;
 
         glm::vec3 lighthouse_light_position = glm::vec3(7.9073563f, 6.8495054f, -14.7876625f);
         glm::vec3 lighthouse_spot_target = glm::vec3(0.0f, 0.0f, -3.0f);
+
+        bool lighthouse_light_enabled = false;
 
         glm::vec3 get_lighthouse_spot_direction();
 
         unsigned int sea_vao;
         unsigned int sea_vbo;
         unsigned int sea_ebo;
+
+        bool t_was_down = false;
+        bool event_started = false;
+        float event_timer = 0.0f;
+
+        bool directional_light_dimmed = false;
 
         void initialize() override;
 

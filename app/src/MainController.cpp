@@ -206,10 +206,12 @@ namespace app {
 
         float dt = platform->dt();
 
-        lighthouse_angle += lighthouse_rotation_speed * dt;
+        if(lighthouse_light_enabled) {
+            lighthouse_angle += lighthouse_rotation_speed * dt;
 
-        if (lighthouse_angle >= 360.0f) {
-            lighthouse_angle -= 360.0f;
+            if (lighthouse_angle >= 360.0f) {
+                lighthouse_angle -= 360.0f;
+            }
         }
 
         bool p_down = platform->key(engine::platform::KeyId::KEY_P).is_down();
@@ -226,6 +228,26 @@ namespace app {
 
         if(boat_moving){
             boat_offset += boat_speed * dt;
+        }
+
+        bool t_down = platform->key(engine::platform::KeyId::KEY_T).is_down();
+        if(t_down && !t_was_down){
+            event_started = true;
+            event_timer = 0.0f;
+        }
+        t_was_down = t_down;
+
+        if(event_started){
+            event_timer += dt;
+
+            if(event_timer >= 2.0f){
+                directional_light_dimmed = true;
+            }
+
+            if(event_timer >= 5.0f){
+                lighthouse_light_enabled = true;
+                event_started = false;
+            }
         }
 
     }
@@ -315,6 +337,8 @@ namespace app {
         shader->set_float("point_light.linear",0.7f);
         shader->set_float("point_light.quadratic", 1.2f);
 
+        shader->set_bool("directional_light_dimmed", directional_light_dimmed);
+
         set_spot_light(shader);
 
         shader->set_int("water_texture", 0);
@@ -343,7 +367,7 @@ namespace app {
         shader->use();
 
         set_directional_light(shader);
-        shader->set_vec3("directional_light.ambient", glm::vec3(0.20f, 0.20f, 0.30f));
+        //shader->set_vec3("directional_light.ambient", glm::vec3(0.20f, 0.20f, 0.30f));
 
         set_spot_light(shader);
 
@@ -391,14 +415,16 @@ namespace app {
             engine::graphics::OpenGL::draw_lamp(lamp_vao,36);
         }
 
-        glm::mat4 lighthouse_lamp_model = glm::mat4(1.0f);
-        lighthouse_lamp_model = glm::translate(lighthouse_lamp_model, lighthouse_light_position);
-        lighthouse_lamp_model = glm::scale(lighthouse_lamp_model, glm::vec3(0.08f));
-        shader->set_mat4("model", lighthouse_lamp_model);
+        if(lighthouse_light_enabled) {
+            glm::mat4 lighthouse_lamp_model = glm::mat4(1.0f);
+            lighthouse_lamp_model = glm::translate(lighthouse_lamp_model, lighthouse_light_position);
+            lighthouse_lamp_model = glm::scale(lighthouse_lamp_model, glm::vec3(0.08f));
+            shader->set_mat4("model", lighthouse_lamp_model);
 
-        engine::graphics::OpenGL::disable_depth_testing();
-        engine::graphics::OpenGL::draw_lamp(lamp_vao, 36);
-        engine::graphics::OpenGL::enable_depth_testing();
+            engine::graphics::OpenGL::disable_depth_testing();
+            engine::graphics::OpenGL::draw_lamp(lamp_vao, 36);
+            engine::graphics::OpenGL::enable_depth_testing();
+        }
 
     }
 
@@ -419,16 +445,26 @@ namespace app {
         draw_skybox();
 
         engine::graphics::OpenGL::enable_blending();
-        draw_lighthouse_beam();
+        if(lighthouse_light_enabled){
+            draw_lighthouse_beam();
+        }
         engine::graphics::OpenGL::disable_blending();
         draw_lamp();
     }
 
     void MainController::set_directional_light(engine::resources::Shader *shader) {
         shader->set_vec3("directional_light.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
-        shader->set_vec3("directional_light.ambient", glm::vec3(0.05f, 0.05f, 0.08f));
-        shader->set_vec3("directional_light.diffuse", glm::vec3(0.20f, 0.25f, 0.35f));
-        shader->set_vec3("directional_light.specular", glm::vec3(0.4f, 0.4f, 0.5f));
+
+        if(directional_light_dimmed) {
+            shader->set_vec3("directional_light.ambient", glm::vec3(0.03f, 0.03f, 0.05f));
+            shader->set_vec3("directional_light.diffuse", glm::vec3(0.08f, 0.10f, 0.14f));
+            shader->set_vec3("directional_light.specular", glm::vec3(0.15f, 0.15f, 0.18f));
+        } else {
+            shader->set_vec3("directional_light.ambient", glm::vec3(0.08f, 0.08f, 0.12f));
+            shader->set_vec3("directional_light.diffuse", glm::vec3(0.30f, 0.35f, 0.45f));
+            shader->set_vec3("directional_light.specular", glm::vec3(0.5f, 0.5f, 0.6f));
+        }
+
     }
 
     void MainController::set_point_light(engine::resources::Shader *shader) {
@@ -459,10 +495,16 @@ namespace app {
 
         shader->set_float("spot_light.cutOff", glm::cos(glm::radians(4.0f)));
         shader->set_float("spot_light.outerCutOff", glm::cos(glm::radians(7.0f)));
+        if(lighthouse_light_enabled) {
+            shader->set_vec3("spot_light.ambient", glm::vec3(0.0f));
+            shader->set_vec3("spot_light.diffuse",glm::vec3(4.0f, 3.0f, 1.2f));
+            shader->set_vec3("spot_light.specular", glm::vec3(1.5f, 1.4f, 1.0f));
+        } else {
+            shader->set_vec3("spot_light.ambient", glm::vec3(0.0f));
+            shader->set_vec3("spot_light.diffuse", glm::vec3(0.0f));
+            shader->set_vec3("spot_light.specular", glm::vec3(0.0f));
+        }
 
-        shader->set_vec3("spot_light.ambient", glm::vec3(0.0f));
-        shader->set_vec3("spot_light.diffuse",glm::vec3(4.0f, 3.0f, 1.2f));
-        shader->set_vec3("spot_light.specular", glm::vec3(1.5f, 1.4f, 1.0f));
 
         shader->set_float("spot_light.constant", 1.0f);
         shader->set_float("spot_light.linear", 0.045f);
