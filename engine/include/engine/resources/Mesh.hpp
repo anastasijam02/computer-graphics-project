@@ -9,7 +9,7 @@
 #include <engine/resources/Texture.hpp>
 #include <glm/glm.hpp>
 #include <vector>
-
+#include <string>
 namespace engine::resources {
 /**
 * @struct Vertex
@@ -38,6 +38,10 @@ public:
     */
     void draw(const Shader *shader);
 
+    const std::string &name() const{
+        return m_name;
+    }
+
     /**
     * @brief Destroys the mesh in the OpenGL context.
     */
@@ -51,11 +55,12 @@ private:
     * @param textures The textures in the mesh.
      */
     Mesh(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices,
-         std::vector<Texture *> textures);
+         std::vector<Texture *> textures, std::string name);
 
     uint32_t m_vao{0};
     uint32_t m_num_indices{0};
     std::vector<Texture *> m_textures;
+    std::string m_name;
 };
 }// namespace engine::resources
 

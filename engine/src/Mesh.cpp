@@ -11,7 +11,7 @@
 namespace engine::resources {
 
 Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices,
-           std::vector<Texture *> textures) {
+           std::vector<Texture *> textures, std::string name) {
     // NOLINTBEGIN
     static_assert(std::is_trivial_v<Vertex>);
     uint32_t vao, vbo, ebo;
@@ -46,6 +46,7 @@ Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &ind
     m_vao = vao;
     m_num_indices = indices.size();
     m_textures = std::move(textures);
+    m_name = std::move(name);
 }
 
 void Mesh::draw(const Shader *shader) {
