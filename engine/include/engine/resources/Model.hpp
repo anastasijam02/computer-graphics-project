@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <engine/resources/Mesh.hpp>
 #include <utility>
+#include <string>
 
 namespace engine::resources {
 /**
@@ -24,6 +25,10 @@ public:
     * @param shader The shader to use for drawing.
     */
     void draw(const Shader *shader);
+
+    void draw_mesh(const Shader *shader, const std::string &mesh_name);
+
+    void draw_except_mesh(const Shader *shader, const std::string &mesh_name);
 
     /**
     * @brief Destroys the model in the OpenGL context.

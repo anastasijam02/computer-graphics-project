@@ -8,6 +8,14 @@
       "lighthouse": {
         "path": "lighthouse/scene.gltf",
         "flip_uvs": true
+      },
+      "boat_lamp": {
+        "path": "boat_lamp/scene.gltf",
+        "flip_uvs": true
+      },
+      "sea": {
+        "path": "sea/plane.obj",
+        "flip_uvs": true
       }
     }
   },

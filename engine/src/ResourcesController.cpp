@@ -231,7 +231,7 @@ void AssimpSceneProcessor::process_mesh(aiMesh *mesh) {
 
     auto material = m_scene->mMaterials[mesh->mMaterialIndex];
     std::vector<Texture *> textures = process_materials(material);
-    m_meshes.emplace_back(Mesh(vertices, indices, std::move(textures)));
+    m_meshes.emplace_back(Mesh(vertices, indices, std::move(textures), mesh->mName.C_Str()));
 }
 
 std::vector<Texture *> AssimpSceneProcessor::process_materials(const aiMaterial *material) {

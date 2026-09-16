@@ -5,8 +5,6 @@
 #ifndef MATF_RG_PROJECT_MAINCONTROLLER_H
 #define MATF_RG_PROJECT_MAINCONTROLLER_H
 #include "engine/core/Controller.hpp"
-
-#include <engine/core/Controller.hpp>
 #include <engine/resources/Shader.hpp>
 #include <glm/glm.hpp>
 namespace app {
@@ -21,12 +19,7 @@ namespace app {
         void initialize_lighthouse_beam();
         void draw_lighthouse_beam();
 
-        unsigned int lamp_vao = 0;
-        unsigned int lamp_vbo = 0;
-
-        void initialize_lamp();
-        void draw_lamp();
-        glm::vec3 boat_front_lamp_position = glm::vec3(1.1393508f, 0.33798105f, -3.0f);
+        glm::vec3 boat_front_lamp_position = glm::vec3(-1.15436f, -0.159531f, -5.02937f);
 
         bool point_light_enabled = true;
         bool p_was_down = false;
@@ -37,15 +30,10 @@ namespace app {
         float boat_speed = 0.2f;
 
         glm::vec3 lighthouse_light_position = glm::vec3(7.9073563f, 6.8495054f, -14.7876625f);
-        glm::vec3 lighthouse_spot_target = glm::vec3(0.0f, 0.0f, -3.0f);
 
         bool lighthouse_light_enabled = false;
 
         glm::vec3 get_lighthouse_spot_direction();
-
-        unsigned int sea_vao;
-        unsigned int sea_vbo;
-        unsigned int sea_ebo;
 
         bool t_was_down = false;
         bool event_started = false;
@@ -66,8 +54,6 @@ namespace app {
         void draw_boat();
 
         void end_draw() override;
-
-        void initialize_sea();
 
         void draw_sea();
 

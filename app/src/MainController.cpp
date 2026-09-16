@@ -10,7 +10,6 @@
 #include "engine/resources/ResourcesController.hpp"
 #include "spdlog/spdlog.h"
 #include <glm/gtc/matrix_transform.hpp>
-#include <vector>
 #include <cmath>
 
 namespace app {
@@ -94,70 +93,6 @@ namespace app {
 
     }
 
-    void MainController::initialize_lamp(){
-        float lamp_vertices[] = {
-            -0.5f, -0.5f, -0.5f,
-             0.5f, -0.5f, -0.5f,
-             0.5f,  0.5f, -0.5f,
-
-             0.5f,  0.5f, -0.5f,
-            -0.5f,  0.5f, -0.5f,
-            -0.5f, -0.5f, -0.5f,
-
-
-            -0.5f, -0.5f,  0.5f,
-             0.5f, -0.5f,  0.5f,
-             0.5f,  0.5f,  0.5f,
-
-             0.5f,  0.5f,  0.5f,
-            -0.5f,  0.5f,  0.5f,
-            -0.5f, -0.5f,  0.5f,
-
-
-            -0.5f,  0.5f,  0.5f,
-            -0.5f,  0.5f, -0.5f,
-            -0.5f, -0.5f, -0.5f,
-
-            -0.5f, -0.5f, -0.5f,
-            -0.5f, -0.5f,  0.5f,
-            -0.5f,  0.5f,  0.5f,
-
-
-             0.5f,  0.5f,  0.5f,
-             0.5f,  0.5f, -0.5f,
-             0.5f, -0.5f, -0.5f,
-
-             0.5f, -0.5f, -0.5f,
-             0.5f, -0.5f,  0.5f,
-             0.5f,  0.5f,  0.5f,
-
-
-            -0.5f, -0.5f, -0.5f,
-             0.5f, -0.5f, -0.5f,
-             0.5f, -0.5f,  0.5f,
-
-             0.5f, -0.5f,  0.5f,
-            -0.5f, -0.5f,  0.5f,
-            -0.5f, -0.5f, -0.5f,
-
-
-            -0.5f,  0.5f, -0.5f,
-             0.5f,  0.5f, -0.5f,
-             0.5f,  0.5f,  0.5f,
-
-             0.5f,  0.5f,  0.5f,
-            -0.5f,  0.5f,  0.5f,
-            -0.5f,  0.5f, -0.5f
-        };
-
-        engine::graphics::OpenGL::initialize_lamp(
-            lamp_vao,
-            lamp_vbo,
-            lamp_vertices,
-            sizeof(lamp_vertices)
-        );
-    }
-
     void MainController::initialize() {
         spdlog::info("MainController initialized!!!");
         auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
@@ -167,8 +102,6 @@ namespace app {
         auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
         graphics->camera()->Position = glm::vec3(0.0f, 1.0f, 0.0f);
 
-        initialize_sea();
-        initialize_lamp();
         initialize_lighthouse_beam();
     }
 
@@ -258,7 +191,7 @@ namespace app {
 
     void MainController::draw_boat() {
         auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
-        engine::resources::Model *boat = resources->model("boat");
+        engine::resources::Model *boat = resources->model("boat_lamp");
 
         engine::resources::Shader *shader = resources->shader("lighting");
 
@@ -276,13 +209,30 @@ namespace app {
         shader->set_mat4("view", graphics->camera()->view_matrix());
 
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(boat_offset, 0.0f, -3.0f));
-        model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::translate(model, glm::vec3(-1.0f + boat_offset, 0.0f, -5.0f));
+        model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(0.1f));
+        model = glm::scale(model, glm::vec3(0.04f));
         shader->set_mat4("model", model);
 
-        boat->draw(shader);
+        //boat->draw(shader);
+        boat->draw_except_mesh(shader, "Object_7");
+        if (point_light_enabled){
+            engine::resources::Shader *lamp_shader = resources->shader("lamp");
+
+            lamp_shader->use();
+
+            lamp_shader->set_mat4("projection", graphics->projection_matrix());
+            lamp_shader->set_mat4("view", graphics->camera()->view_matrix());
+            lamp_shader->set_mat4("model", model);
+
+            boat->draw_mesh(lamp_shader, "Object_7");
+        } else{
+            shader->use();
+            shader->set_mat4("model", model);
+            boat->draw_mesh(shader, "Object_7");
+        }
+
     }
 
     void MainController::end_draw() {
@@ -290,34 +240,12 @@ namespace app {
         platform->swap_buffers();
     }
 
-    void MainController::initialize_sea() {
-        float sea_vertices[] = {
-            // position            // texture coordinates
-            -1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-            1.0f, 0.0f, -1.0f, 10.0f, 0.0f,
-            1.0f, 0.0f, 1.0f, 10.0f, 10.0f,
-            -1.0f, 0.0f, 1.0f, 0.0f, 10.0f
-        };
-
-        unsigned int sea_indices[] = {
-            0, 2, 1,
-            0, 3, 2
-        };
-
-        engine::graphics::OpenGL::initialize_sea(
-            sea_vao,
-            sea_vbo,
-            sea_ebo,
-            sea_vertices,
-            sizeof(sea_vertices),
-            sea_indices,
-            sizeof(sea_indices)
-        );
-    }
 
     void MainController::draw_sea() {
         auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
         auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
+
+        auto sea = resources->model("sea");
 
         engine::resources::Shader *shader = resources->shader("sea");
         engine::resources::Texture *water_texture = resources->texture("dark_water");
@@ -353,7 +281,7 @@ namespace app {
 
         water_texture->bind(engine::graphics::OpenGL::texture_unit(0));
 
-        engine::graphics::OpenGL::draw_indexed(sea_vao, 6);
+        sea->draw(shader);
     }
 
     void MainController::draw_lighthouse() {
@@ -367,7 +295,6 @@ namespace app {
         shader->use();
 
         set_directional_light(shader);
-        //shader->set_vec3("directional_light.ambient", glm::vec3(0.20f, 0.20f, 0.30f));
 
         set_spot_light(shader);
 
@@ -376,7 +303,7 @@ namespace app {
         shader->set_mat4("projection",graphics->projection_matrix());
         shader->set_mat4("view",graphics->camera()->view_matrix());
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model,glm::vec3(8.0f, 0.0f, -15.0f));
+        model = glm::translate(model,glm::vec3(8.0f, 0.0f, -19.0f));
         model = glm::rotate(model,glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         model = glm::scale(model,glm::vec3(0.1f));
         shader->set_mat4("model", model);
@@ -393,50 +320,15 @@ namespace app {
 
     }
 
-    void MainController::draw_lamp(){
-        auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
 
-        auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
-
-        auto shader = resources->shader("lamp");
-
-        shader->use();
-
-        shader->set_mat4("projection", graphics->projection_matrix());
-        shader->set_mat4("view", graphics->camera()->view_matrix());
-
-        if(point_light_enabled) {
-            glm::mat4 model = glm::mat4(1.0f);
-            glm::vec3 current_lamp_position = boat_front_lamp_position + glm::vec3(boat_offset, 0.0f, 0.0f);
-            model = glm::translate(model, current_lamp_position);
-            model = glm::scale(model, glm::vec3(0.04f));
-            shader->set_mat4("model", model);
-
-            engine::graphics::OpenGL::draw_lamp(lamp_vao,36);
-        }
-
-        if(lighthouse_light_enabled) {
-            glm::mat4 lighthouse_lamp_model = glm::mat4(1.0f);
-            lighthouse_lamp_model = glm::translate(lighthouse_lamp_model, lighthouse_light_position);
-            lighthouse_lamp_model = glm::scale(lighthouse_lamp_model, glm::vec3(0.08f));
-            shader->set_mat4("model", lighthouse_lamp_model);
-
-            engine::graphics::OpenGL::disable_depth_testing();
-            engine::graphics::OpenGL::draw_lamp(lamp_vao, 36);
-            engine::graphics::OpenGL::enable_depth_testing();
-        }
-
-    }
 
     glm::vec3 MainController::get_lighthouse_spot_direction() {
-        //return glm::normalize(lighthouse_spot_target - lighthouse_light_position);
         float angle = glm::radians(lighthouse_angle);
 
         glm::vec3 direction(glm::cos(angle),-0.5f, glm::sin(angle));
 
         return glm::normalize(direction);
     }
-
 
     void MainController::draw() {
         draw_sea();
@@ -449,7 +341,6 @@ namespace app {
             draw_lighthouse_beam();
         }
         engine::graphics::OpenGL::disable_blending();
-        draw_lamp();
     }
 
     void MainController::set_directional_light(engine::resources::Shader *shader) {
@@ -483,8 +374,8 @@ namespace app {
 
 
         shader->set_float("point_light.constant", 1.0f);
-        shader->set_float("point_light.linear", 2.0f);
-        shader->set_float("point_light.quadratic", 4.0f);
+        shader->set_float("point_light.linear", 0.14f);
+        shader->set_float("point_light.quadratic", 0.07f);
     }
 
     void MainController::set_spot_light(engine::resources::Shader *shader) {
