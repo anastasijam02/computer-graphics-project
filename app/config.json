@@ -1,10 +1,6 @@
 {
   "resources": {
     "models": {
-      "boat": {
-        "path": "boat/scene.gltf",
-        "flip_uvs": true
-      },
       "lighthouse": {
         "path": "lighthouse/scene.gltf",
         "flip_uvs": true
